@@ -10,8 +10,9 @@ process doMashKallistoPipeline {
     publishDir "$results_dir/mg20_mash_kallisto_pipeline", mode: 'symlink'
 
     input:
-        path mash_output, val(top_strains)  // Archivo de salida de Mash y número de cepas
-        tuple(val(illumina_id), path(fastq_paired))  // Secuencias paired-end
+        path mash_output, 
+        val(top_strains)  
+        //tuple(val(illumina_id), path(fastq_paired))  // Secuencias paired-end
 
     output:
         path 'mash_kallisto_output/*'  // Ruta de salida
