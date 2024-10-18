@@ -1,3 +1,6 @@
+
+include { doMashKallistoPipeline  } from '../modules/mashKalisto'
+
 workflow MASH_KALLISTO {
     take:
     ch_fastq_paired
