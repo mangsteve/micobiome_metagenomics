@@ -8,7 +8,7 @@ include { METAPHLAN } from './workflows/metaphlanwf.nf'
 include { CENTRIFUGE } from './workflows/centrifugewf.nf'
 include { CLARK } from './workflows/clarkwf.nf'
 include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
-
+include { MASH } from './workflows/mashwf.nf'
 
 workflow {
 
@@ -88,6 +88,16 @@ workflow {
     } else {
         ch_clark_reports = Channel.from([])
     }
+
+    if (params.workflows.doMashPipeline) {
+        MASH(
+            ch_rawfastq  // Secuencias paired-end
+        )
+        ch_mash_output = MASH.out
+    } else {
+        ch_mash_output = Channel.from([])
+    }
+
 
 
     if (params.workflows.doMashKallistoPipeline) {

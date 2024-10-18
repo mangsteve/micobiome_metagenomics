@@ -1,5 +1,5 @@
 process doMashKallistoPipeline {
-    label 'mg20_mash_kallisto_pipeline'
+    label 'mg21_mash_kallisto_pipeline'
     conda params.doMashKallistoPipeline.conda
     cpus params.resources.doMashKallistoPipeline.cpus
     memory params.resources.doMashKallistoPipeline.mem
