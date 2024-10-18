@@ -5,6 +5,7 @@ workflow MASH_KALLISTO {
     take:
     ch_fastq_paired
     ch_mash_output
+    top_strains
 
     main:
     // Ejecutar Mash Kallisto Pipeline
