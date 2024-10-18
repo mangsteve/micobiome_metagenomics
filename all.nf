@@ -13,8 +13,7 @@ include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
 workflow {
 
   
-    ch_rawfastq = Channel.fromFilePairs(params.raw_fastq)
-    .view{"FilePairs input: $it"}
+    ch_rawfastq = Channel.fromFilePairs(params.raw_fastq).view{"FilePairs input: $it"}
 
     if (params.workflows.doCleanFastq) {
         CLEANFASTQ(ch_rawfastq)
