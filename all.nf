@@ -93,7 +93,7 @@ workflow {
         MASH(
             ch_rawfastq  // Secuencias paired-end
         )
-        ch_mash_output = MASH.out
+        mash_output_file = MASH.out
     } else {
         ch_mash_output = Channel.from([])
     }
