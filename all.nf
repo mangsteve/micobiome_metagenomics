@@ -89,22 +89,21 @@ workflow {
         ch_clark_reports = Channel.from([])
     }
 
+    // Ejecutar el workflow de Mash si está habilitado
     if (params.workflows.doMashPipeline) {
         MASH(
             ch_rawfastq  // Secuencias paired-end
         )
-        mash_output_file = MASH.out
+        ch_mash_output = MASH.out
     } else {
         ch_mash_output = Channel.from([])
     }
 
-
-
+    // Ejecutar el workflow de Mash Kallisto si está habilitado
     if (params.workflows.doMashKallistoPipeline) {
-        // Llamar al workflow específico para Mash Kallisto
         MASH_KALLISTO(
-            ch_rawfastq,  // Secuencias paired-end
-            mash_output_file  // Archivo de salida de Mash
+            ch_rawfastq,       // Secuencias paired-end
+            ch_mash_output     // Canal de salida de Mash
         )
         ch_mash_kallisto_output = MASH_KALLISTO.out
     } else {
