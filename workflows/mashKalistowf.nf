@@ -8,7 +8,7 @@ workflow MASH_KALLISTO {
     doMashKallistoPipeline(
         
         params.doMashKallistoPipeline.top_strains,  // Número de cepas a seleccionar
-        ch_fastq_paired  // Secuencias paired-end
+        ch_mash_output
     )
 
     emit:

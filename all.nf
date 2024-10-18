@@ -104,7 +104,7 @@ workflow {
         // Llamar al workflow específico para Mash Kallisto
         MASH_KALLISTO(
             ch_rawfastq,  // Secuencias paired-end
-            //mash_output_file  // Archivo de salida de Mash
+            mash_output_file  // Archivo de salida de Mash
         )
         ch_mash_kallisto_output = MASH_KALLISTO.out
     } else {
