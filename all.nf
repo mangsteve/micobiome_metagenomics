@@ -103,7 +103,7 @@ workflow {
     if (params.workflows.doMashKallistoPipeline) {
         MASH_KALLISTO(
             ch_rawfastq,       // Secuencias paired-end
-            ch_mash_output     // Canal de salida de Mash
+            ch_mash_output,     // Canal de salida de Mash
             top_strains
         )
         ch_mash_kallisto_output = MASH_KALLISTO.out
