@@ -10,19 +10,16 @@ process doMashKallistoPipeline {
     publishDir "$results_dir/mg20_mash_kallisto_pipeline", mode: 'symlink'
 
     input:
-        path mash_output, 
-        val(top_strains)  
-        //tuple(val(illumina_id), path(fastq_paired))  // Secuencias paired-end
+        path mash_output
+        val(top_strains)
+        tuple(val(illumina_id), path(fastq_paired))
 
     output:
-        path 'mash_kallisto_output/*'  // Ruta de salida
+        path 'mash_kallisto_output/*'
 
     script:
     """
-    # Crear un directorio para la salida de Kallisto
     mkdir -p mash_kallisto_output
-
-    # Ejecutar Mash Kallisto Pipeline con las secuencias paired-end
     python3 mash_kallisto_pipeline.py !{mash_output} !{top_strains} \
         --directory mash_kallisto_output \
         --reads1 !{fastq_paired[0]} \

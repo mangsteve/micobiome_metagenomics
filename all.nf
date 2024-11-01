@@ -7,8 +7,9 @@ include { HUMANN3 } from './workflows/humann3wf.nf'
 include { METAPHLAN } from './workflows/metaphlanwf.nf'
 include { CENTRIFUGE } from './workflows/centrifugewf.nf'
 include { CLARK } from './workflows/clarkwf.nf'
-include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
 include { MASH } from './workflows/mashwf.nf'
+include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
+include { BUILDINDEX_KALLISTO, QUANTIFY_WITH_KALLISTO } from './workflows/kallistowf.nf'
 
 workflow {
 
@@ -90,26 +91,28 @@ workflow {
     }
 
     // 
-    if (params.workflows.doMashPipeline) {
-        MASH(
-            ch_rawfastq  // Secuencias paired-end
-        )
+    if (params.workflows.doMash) {
+        MASH(ch_fastq_filtered)
         ch_mash_output = MASH.out
-    } else {
-        ch_mash_output = Channel.from([])
     }
 
-    // 
     if (params.workflows.doMashKallistoPipeline) {
-        MASH_KALLISTO(
-            ch_mash_output,     // Canal de salida de Mash
-            top_strains
-        )
+        MASH_KALLISTO(ch_mash_output, params.doMashKallistoPipeline.top_strains)
         ch_mash_kallisto_output = MASH_KALLISTO.out
-    } else {
-        ch_mash_kallisto_output = Channel.from([])
     }
-    
+
+    if (params.buildindexKallisto.do_index) {
+        BUILDINDEX_KALLISTO(ch_mash_kallisto_output)
+        ch_kallisto_index = BUILDINDEX_KALLISTO.out
+    } else {
+        ch_kallisto_index = Channel.fromPath(params.buildindexKallisto.index_path)
+    }
+
+    if (params.workflows.doKallistoQuant) {
+        QUANTIFY_WITH_KALLISTO(ch_kallisto_index, ch_fastq_filtered)
+        ch_kallisto_result = QUANTIFY_WITH_KALLISTO.out
+    }
+
 
     //Call MultiQC workflow
     if (params.workflows.doMultiQC) {

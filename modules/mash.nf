@@ -12,11 +12,14 @@ process doMash {
     tuple(val(illumina_id), path(fastq_paired))
 
     output:
-    path 'mash_output.txt'
+    path "*.msh"  // Cambio a formato .msh
 
     script:
     """
-    # Ejecutar Mash
-    mash sketch -o mash_output.txt !{fastq_paired[0]} !{fastq_paired[1]}
+    # Ejecutar Mash para crear un sketch de los archivos FASTQ
+    mash sketch -o ${illumina_id}.msh -m 2 !{fastq_paired[0]} !{fastq_paired[1]}
+    # Información del sketch para verificación
+    mash info ${illumina_id}.msh
     """
 }
+
