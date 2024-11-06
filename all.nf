@@ -13,7 +13,6 @@ include { BUILDINDEX_KALLISTO, QUANTIFY_WITH_KALLISTO } from './workflows/kallis
 
 workflow {
 
-  
     ch_rawfastq = Channel.fromFilePairs(params.raw_fastq).view{"FilePairs input: $it"}
 
     if (params.workflows.doCleanFastq) {
@@ -28,7 +27,6 @@ workflow {
     } else {
         print "Skipping CLEANFASTQ. Taking raw fastq as final fastq."
         ch_fastq_filtered = ch_rawfastq
-
         ch_fastq_processed  = Channel.from([])
         ch_fastq_processed_paired = Channel.from([])
         ch_fastq_filtered_all = Channel.from([])
@@ -36,7 +34,8 @@ workflow {
         ch_alignment_output = Channel.from([])
         ch_bam_sorted = Channel.from([])
     }
-    //Call kraken workflow
+
+    // Llamada a kraken workflow
     if (params.workflows.doKraken2Bracken) {
         KRAKEN2BRACKEN(ch_fastq_filtered)
         ch_kraken2_output = KRAKEN2BRACKEN.out.ch_kraken2_output
@@ -53,7 +52,7 @@ workflow {
         ch_krona_output = Channel.from([])
     }
 
-    //Call Humann3 workflow
+    // Llamada a Humann3 workflow
     if (params.workflows.doHumann3) {
         HUMANN3(ch_fastq_filtered)
         ch_humann3 = HUMANN3.out.ch_humann3
@@ -61,7 +60,7 @@ workflow {
         ch_humann3 = Channel.from([])
     }
 
-    //Call Metaphlan workflow
+    // Llamada a Metaphlan workflow
     if (params.workflows.doMetaphlan) {
         METAPHLAN(ch_fastq_filtered)
         ch_metaphlan = METAPHLAN.out.ch_metaphlan
@@ -71,7 +70,7 @@ workflow {
         ch_metaphlan_merged = Channel.from([])
     }
 
-    //Call Centrifuge workflow
+    // Llamada a Centrifuge workflow
     if (params.workflows.doCentrifuge) {
         CENTRIFUGE(ch_fastq_filtered)
         ch_centrifuge = CENTRIFUGE.out.ch_centrifuge
@@ -79,28 +78,32 @@ workflow {
         ch_centrifuge = Channel.from([])
     }
 
-
+    // Llamada a CLARK workflow
     if (params.workflows.doCLARK) {
-        doCLARK(
-            params.doCLARK.clark_db,
-            ch_rawfastq
-        )
-        ch_clark_reports = doCLARK.out
+        CLARK(params.doCLARK.clark_db, ch_rawfastq)
+        ch_clark_reports = CLARK.out
     } else {
         ch_clark_reports = Channel.from([])
     }
 
-    // 
+    // Llamada a Mash workflow
     if (params.workflows.doMash) {
-        MASH(ch_fastq_filtered)
+        ch_reference_sketch = Channel.fromPath(params.doMash.reference_sketch)
+        MASH(ch_reference_sketch, ch_rawfastq)
         ch_mash_output = MASH.out
+    } else {
+        ch_mash_output = Channel.from([])
     }
 
+    // Llamada a Mash Kallisto Pipeline
     if (params.workflows.doMashKallistoPipeline) {
         MASH_KALLISTO(ch_mash_output, params.doMashKallistoPipeline.top_strains)
         ch_mash_kallisto_output = MASH_KALLISTO.out
+    } else {
+        ch_mash_kallisto_output = Channel.from([])
     }
 
+    // Llamada a Build Index Kallisto
     if (params.buildindexKallisto.do_index) {
         BUILDINDEX_KALLISTO(ch_mash_kallisto_output)
         ch_kallisto_index = BUILDINDEX_KALLISTO.out
@@ -108,13 +111,22 @@ workflow {
         ch_kallisto_index = Channel.fromPath(params.buildindexKallisto.index_path)
     }
 
+    // Llamada a Kallisto Quantificación
     if (params.workflows.doKallistoQuant) {
         QUANTIFY_WITH_KALLISTO(ch_kallisto_index, ch_fastq_filtered)
         ch_kallisto_result = QUANTIFY_WITH_KALLISTO.out
+    } else {
+        ch_kallisto_result = Channel.from([])
+    }
+    
+    if (params.workflows.doClarkS) {
+        CLARK_S(ch_fastq_paired)
+        ch_clark_s_output = CLARK_S.out
+    } else {
+        ch_clark_s_output = Channel.from([])
     }
 
-
-    //Call MultiQC workflow
+    // Llamada a MultiQC workflow
     if (params.workflows.doMultiQC) {
         MULTIQC(
             ch_fastqc,
@@ -130,6 +142,4 @@ workflow {
         print "Skipping MULTIQC."
         ch_multiqc_out = Channel.from([])
     }
-
-
 }

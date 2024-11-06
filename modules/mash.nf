@@ -1,6 +1,6 @@
 process doMash {
     label 'mg20_mash'
-    conda params.doMash.conda  // Entorno Conda para Mash
+    conda params.doMash.conda
     cpus params.resources.doMash.cpus
     memory params.resources.doMash.mem
     queue params.resources.doMash.queue
@@ -9,17 +9,18 @@ process doMash {
     maxRetries 5
 
     input:
-    tuple(val(illumina_id), path(fastq_paired))
+    path reference_sketch 
+    tuple(val(illumina_id), path(fastq_paired)) 
 
     output:
-    path "*.msh"  // Cambio a formato .msh
+    path 'mash_output.msh'
 
     script:
     """
-    # Ejecutar Mash para crear un sketch de los archivos FASTQ
-    mash sketch -o ${illumina_id}.msh -m 2 !{fastq_paired[0]} !{fastq_paired[1]}
-    # Información del sketch para verificación
-    mash info ${illumina_id}.msh
+    # Crear sketch de las lecturas
+    mash sketch -o sample_sketch !{fastq_paired[0]} !{fastq_paired[1]}
+
+    # Ejecutar Mash para comparar las lecturas contra el sketch de referencia
+    mash dist !{reference_sketch} sample_sketch.msh > mash_output.dist
     """
 }
-
