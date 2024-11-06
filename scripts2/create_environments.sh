@@ -235,3 +235,11 @@ conda install -y -c bioconda kmcp
  #OPAL for comparison to ground truth
  # https://github.com/CAMI-challenge/OPAL?tab=readme-ov-file#inputs
  
+ # HAYSTAC
+
+ conda create -y --name mamba-env python=3.12
+ conda activate mamba-env
+ conda install -y -c conda-forge mamba
+
+ mamba create -c conda-forge -c bioconda -n haystac-env haystac
+ conda activate haystac-env
