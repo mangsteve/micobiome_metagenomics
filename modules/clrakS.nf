@@ -7,17 +7,31 @@ process doClarkS {
     clusterOptions params.resources.doClarkS.clusterOptions
     errorStrategy { task.exitStatus in 1..2 ? 'retry' : 'ignore' }
     maxRetries 5
-    publishDir "$results_dir/mg21_clark_s", mode: 'symlink'
+    publishDir "$results_dir/mg19_clark_s", mode: 'symlink'
 
     input:
-    tuple(val(sample_id), path(fastq_file))  // Archivos de entrada de CLARK-S (paired-end o single-end)
+    val clark_tool        
+    val clark_targets     
+    path db_dir           
+    tuple(val(sample_id), path(fastq_paired))  
 
     output:
-    path "${sample_id}_clark_s_result.csv"
+    tuple(val(sample_id), path("results_*.csv"))
 
     script:
     """
-    # Ejecutar CLARK-S para clasificar metagenomas
-    ./classify_metagenome.sh -O !{fastq_file} -R ${sample_id}_clark_s_result.csv --spaced
+    output_file=results_!{sample_id}.csv
+
+    # Ejecutar CLARK-S con discriminativos espaciales
+    !{clark_tool} \
+        -k 10 \
+        -T !{clark_targets} \
+        -t 1 \
+        -D !{db_dir} \
+        -P !{fastq_paired[0]} !{fastq_paired[1]} \
+        -o 0 \
+        -R $output_file \
+        --spaced \
+        -n !{task.cpus}
     """
 }

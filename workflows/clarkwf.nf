@@ -1,18 +1,22 @@
-include { doCLARK } from '../modules/clark'
+include { doClark } from '../modules/doClark'
 
-workflow CLARK {
+workflow CLARK_WORKFLOW {
     take:
-        ch_fastq_paired
+    ch_fastq_paired
+    clark_tool
+    clark_targets
+    db_dir
 
     main:
-        doCLARK(
-            params.doCLARK.clark_db,  
-            ch_fastq_paired             
-        )
-        ch_clark_reports = doCLARK.out
-        ch_clark_reports.view { "CLARK output: $it" }
+    doClark(
+        clark_tool,
+        clark_targets,
+        db_dir,
+        ch_fastq_paired
+    )
+    ch_clark_output = doClark.out
 
     emit:
-        ch_clark_reports
+    ch_clark_output
 }
 

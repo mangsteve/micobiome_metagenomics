@@ -1,34 +1,36 @@
-process doCLARK {
-  label 'mg19_clark'
-  conda params.doCLARK.conda
-  cpus params.resources.doCLARK.cpus
-  memory params.resources.doCLARK.mem
-  queue params.resources.doCLARK.queue
-  clusterOptions params.resources.doCLARK.clusterOptions
-  errorStrategy { task.exitStatus in 1..2 ? 'retry' : 'ignore' }
-  maxRetries 10
-  publishDir "$results_dir/mg19_clark", mode: 'symlink'
+process doClark {
+    label 'mg19_clark'
+    conda params.doClark.conda
+    cpus params.resources.doClark.cpus
+    memory params.resources.doClark.mem
+    queue params.resources.doClark.queue
+    clusterOptions params.resources.doClark.clusterOptions
+    errorStrategy { task.exitStatus in 1..2 ? 'retry' : 'ignore' }
+    maxRetries 5
+    publishDir "$results_dir/mg19_clark", mode: 'symlink'
 
-  input:
-    val clark_db  // Índice de CLARKK
-    tuple(val(illumina_id), path(fastq_paired))
+    input:
+    val clark_tool        
+    val clark_targets     
+    path db_dir           
+    tuple(val(sample_id), path(fastq_paired))  
 
-  output:
-    tuple(val(illumina_id), path('*_clark_report.txt'))
+    output:
+    tuple(val(sample_id), path("results_*.csv"))
 
-  shell:
-  '''
-  output=!{illumina_id}_clark_report.txt
+    script:
+    """
+    output_file=results_!{sample_id}.csv
 
-  clark -k !{clark_db} \
-    --seq !{fastq_paired[0]} \
-    --seq !{fastq_paired[1]} \
-    --threads !{params.resources.doCLARK.cpus} \
-    > $output
-  '''
-
-  stub:
-  """
-  touch !{illumina_id}_clark_report.txt
-  """
+    # Ejecutar CLARK
+    !{clark_tool} \
+        -k 10 \
+        -T !{clark_targets} \
+        -t 1 \
+        -D !{db_dir} \
+        -P !{fastq_paired[0]} !{fastq_paired[1]} \
+        -o 0 \
+        -R $output_file \
+        -n !{task.cpus}
+    """
 }

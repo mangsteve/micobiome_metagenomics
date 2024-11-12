@@ -7,6 +7,7 @@ include { HUMANN3 } from './workflows/humann3wf.nf'
 include { METAPHLAN } from './workflows/metaphlanwf.nf'
 include { CENTRIFUGE } from './workflows/centrifugewf.nf'
 include { CLARK } from './workflows/clarkwf.nf'
+include { CLARK_S} from './workflows/clarkSwf.nf'
 include { MASH } from './workflows/mashwf.nf'
 include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
 include { BUILDINDEX_KALLISTO, QUANTIFY_WITH_KALLISTO } from './workflows/kallistowf.nf'
@@ -80,10 +81,30 @@ workflow {
 
     // Llamada a CLARK workflow
     if (params.workflows.doCLARK) {
-        CLARK(params.doCLARK.clark_db, ch_rawfastq)
-        ch_clark_reports = CLARK.out
+        CLARK_WORKFLOW(
+            
+            ch_fastq_processed_paired,
+            clark_tool,
+            clark_targets,
+            db_dir
+        )
+        ch_clark_output = CLARK_WORKFLOW.out
     } else {
-        ch_clark_reports = Channel.from([])
+        ch_clark_output = Channel.from([])
+    }
+
+    // Llamar al workflow de CLARK-S
+    if (params.workflows.doCLARKS) {
+        CLARK_S_WORKFLOW(
+            ch_fastq_processed_paired,
+            clark_s_tool,
+            clark_targets,
+            db_dir
+            spaced_option,
+        )
+        ch_clark_s_output = CLARK_S_WORKFLOW.out
+    } else {
+        ch_clark_s_output = Channel.from([])
     }
 
     // Llamada a Mash workflow

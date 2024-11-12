@@ -13,6 +13,8 @@ process doMash {
     tuple(val(illumina_id), path(fastq_paired)) 
 
     output:
+    ///tupla y nombre del archivo
+    ///aqui tenemos que coger el dist
     path 'mash_output.msh'
 
     script:

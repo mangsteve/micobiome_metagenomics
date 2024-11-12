@@ -15,6 +15,7 @@ process doMashKallistoPipeline {
         tuple(val(illumina_id), path(fastq_paired))
 
     output:
+    ///otra vez el nombre 
         path 'mash_kallisto_output/*'
 
     script:
