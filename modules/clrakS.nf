@@ -13,14 +13,14 @@ process doClarkS {
     val clark_tool        
     val clark_targets     
     path db_dir           
-    tuple(val(sample_id), path(fastq_paired))  
+    tuple(val(illumina_id), path(fastq_paired))  
 
     output:
-    tuple(val(sample_id), path("results_*.csv"))
+    tuple(val(illumina_id), path("results_Clark_S*.csv"))
 
     script:
     """
-    output_file=results_!{sample_id}.csv
+    output_file=results_!{illumina_id)}.csv
 
     # Ejecutar CLARK-S con discriminativos espaciales
     !{clark_tool} \
@@ -30,7 +30,7 @@ process doClarkS {
         -D !{db_dir} \
         -P !{fastq_paired[0]} !{fastq_paired[1]} \
         -o 0 \
-        -R $output_file \
+        -R output_file \
         --spaced \
         -n !{task.cpus}
     """
