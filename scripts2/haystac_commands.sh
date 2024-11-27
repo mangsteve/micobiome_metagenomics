@@ -11,6 +11,10 @@ haystac database \
     --refseq-rep prokaryote_rep \
     --output refseq_db
 
+haystac database --mode build \
+    --output eukaryotes_db_haystac \
+    --refseq-rep eukaryotes
+
 haystac sample \
     --sra ERR1018966 \
     --output ERR1018966

@@ -201,7 +201,7 @@ conda install -y bioconda::blast #Needed for dust
 conda install conda-forge::jellyfish
 
 #k-SLAM
-conda create -y --name kslam-env python=3.10
+conda create -y --name kslam-env python=3.12
 conda activate kslam-env
 #conda install -y bioconda::k-slam
 #conda install -y bioconda/label/cf201901::k-slam
@@ -213,7 +213,7 @@ make
 cp SLAM /home/carmoma/miniforge3/envs/kslam-env/bin
 
 # CCMETAGEN
-conda create -n ccmetagen ccmetagen -c bioconda -c conda-forge
+conda create -n ccmetagen-env ccmetagen -c bioconda -c conda-forge
 
 # PROPHYLE
 conda create -y --name prophyle-env python=3.10
