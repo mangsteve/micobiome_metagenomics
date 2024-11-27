@@ -10,17 +10,18 @@ process doClarkS {
     publishDir "$results_dir/mg19_clark_s", mode: 'symlink'
 
     input:
-    val clark_tool        
-    val clark_targets     
-    path db_dir           
-    tuple(val(illumina_id), path(fastq_paired))  
+    path clark_tool        
+    path clark_targets     
+    path db_dir 
+    val spaced_option          
+    tuple(val(sample_id), path(fastq_paired))  
 
     output:
-    tuple(val(illumina_id), path("results_Clark_S*.csv"))
+    tuple(val('CLARKS'), val(sample_id), path("*_CLARKS.raw.csv"))
 
-    script:
-    """
-    output_file=results_!{illumina_id)}.csv
+    shell:
+    '''
+    output_file=!{sample_id}_CLARKS.raw.csv
 
     # Ejecutar CLARK-S con discriminativos espaciales
     !{clark_tool} \
@@ -30,8 +31,14 @@ process doClarkS {
         -D !{db_dir} \
         -P !{fastq_paired[0]} !{fastq_paired[1]} \
         -o 0 \
-        -R output_file \
-        --spaced \
+        {spaced_option}\
         -n !{task.cpus}
+    '''
+
+    stub:
     """
+    touch $sample_id'_CLARKS.raw.csv'
+    """
+
+
 }

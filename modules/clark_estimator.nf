@@ -7,29 +7,27 @@ process estimateClark {
     clusterOptions params.resources.doClark.clusterOptions
     errorStrategy { task.exitStatus in 1..2 ? 'retry' : 'ignore' }
     maxRetries 5
-    publishDir "$results_dir/mg23_clark", mode: 'symlink'
+    publishDir "$results_dir/mgestimated_clark", mode: 'symlink'
 
-    input:
-    val estimator_tool            
-    path db_dir           
-    tuple(val(sample_id), path(clark_results), path(clarks_results)) 
+    input:        
+    tuple(val(program_id), val(sample_id), path(read_assignment)) 
 
     output:
-    tuple(val(sample_id), path("clark_estimated_*.csv"), path("clarks_estimated_*.csv"))
+    tuple(val(program_id), val(sample_id), path("*_estimated.csv"))
 
-    script:
-    """
-    clark_output_file=clark_estimated_!{sample_id}.csv
-    clarks_output_file=clarks_estimated_!{sample_id}.csv
-
+    shell:
+    '''
+    clark_output_file= aaa_bbb_estimated.csv
   
-    !{estimator_tool} \
-        -F !{clark_results}
-        -D !{db_dir} \
+    !{params.estimateClark.clark_tool} \
+        -F !{read_assignment}\
+        -D !{params.estimateClark.db_dir} 
        
 
-    !{estimator_tool} \
-        -F !{clarks_results}
-        -D !{db_dir} \
+    '''
+
+    stub:
+    """
+    touch $sample_id'_'$program_id'_estimated.csv'
     """
 }

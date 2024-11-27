@@ -10,17 +10,17 @@ process doClark {
     publishDir "$results_dir/mg19_clark", mode: 'symlink'
 
     input:
-    val clark_tool        
-    val clark_targets     
+    path clark_tool        
+    path clark_targets     
     path db_dir           
     tuple(val(sample_id), path(fastq_paired))  
 
     output:
-    tuple(val(sample_id), path("results_*.csv"))
+    tuple(val("CLARK"), val(sample_id), path("*_CLARK.raw.csv"))
 
-    script:
-    """
-    output_file=results_!{sample_id}.csv
+    shell:
+    '''
+    output_file=!{sample_id}_CLARK.raw.csv
 
     # Ejecutar CLARK
     !{clark_tool} \
@@ -30,7 +30,11 @@ process doClark {
         -D !{db_dir} \
         -P !{fastq_paired[0]} !{fastq_paired[1]} \
         -o 0 \
-        -R $output_file \
         -n !{task.cpus}
+    '''
+
+    stub:
+    """
+    touch $sample_id'_CLARK.raw.csv'
     """
 }

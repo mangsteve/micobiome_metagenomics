@@ -6,11 +6,12 @@ include { MULTIQC } from './workflows/multiqcwf.nf'
 include { HUMANN3 } from './workflows/humann3wf.nf'
 include { METAPHLAN } from './workflows/metaphlanwf.nf'
 include { CENTRIFUGE } from './workflows/centrifugewf.nf'
-include { CLARK } from './workflows/clarkwf.nf'
-include { CLARK_S} from './workflows/clarkSwf.nf'
-include { MASH } from './workflows/mashwf.nf'
-include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
-include { BUILDINDEX_KALLISTO, QUANTIFY_WITH_KALLISTO } from './workflows/kallistowf.nf'
+include { CLARK_WORKFLOW  } from './workflows/clarkwf.nf'
+include { CLARK_S_WORKFLOW } from './workflows/clarkSwf.nf'
+include { CLARK_AND_CLARKS_ESTIMATION} from './workflows/clarkEstimatorwf.nf'
+//include { MASH } from './workflows/mashwf.nf'
+//include { MASH_KALLISTO } from './workflows/mashKalistowf.nf'
+//include { BUILDINDEX_KALLISTO, QUANTIFY_WITH_KALLISTO } from './workflows/kallistowf.nf'
 
 workflow {
 
@@ -81,71 +82,74 @@ workflow {
 
     // Llamada a CLARK workflow
     if (params.workflows.doCLARK) {
+        print "Doing CLARK."
         CLARK_WORKFLOW(
-            
-            ch_fastq_processed_paired,
-            clark_tool,
-            clark_targets,
-            db_dir
+            ch_fastq_filtered
         )
         ch_clark_output = CLARK_WORKFLOW.out
     } else {
         ch_clark_output = Channel.from([])
+        print "Skipping CLARKS."
     }
 
     // Llamar al workflow de CLARK-S
     if (params.workflows.doCLARKS) {
+        print "Doing CLARKS."
         CLARK_S_WORKFLOW(
-            ch_fastq_processed_paired,
-            clark_s_tool,
-            clark_targets,
-            db_dir
-            spaced_option,
+            ch_fastq_filtered
         )
         ch_clark_s_output = CLARK_S_WORKFLOW.out
     } else {
+        print "Skipping CLARKS."
         ch_clark_s_output = Channel.from([])
     }
-
-    // Llamada a Mash workflow
-    if (params.workflows.doMash) {
-        ch_reference_sketch = Channel.fromPath(params.doMash.reference_sketch)
-        MASH(ch_reference_sketch, ch_rawfastq)
-        ch_mash_output = MASH.out
+    // Llamar al workflow del estimador
+    if (params.workflows.estimateClark) {
+        print "Doing CLARK Estimator."
+        CLARK_AND_CLARKS_ESTIMATION(
+           ch_clark_output,
+           ch_clark_s_output
+        )
+        ch_clark_estimator_output = CLARK_AND_CLARKS_ESTIMATION.out
     } else {
-        ch_mash_output = Channel.from([])
+        print "Skipping Estimator."
+        ch_clark_estimator_output = Channel.from([])
     }
 
-    // Llamada a Mash Kallisto Pipeline
-    if (params.workflows.doMashKallistoPipeline) {
-        MASH_KALLISTO(ch_mash_output, params.doMashKallistoPipeline.top_strains)
-        ch_mash_kallisto_output = MASH_KALLISTO.out
-    } else {
-        ch_mash_kallisto_output = Channel.from([])
-    }
-
-    // Llamada a Build Index Kallisto
-    if (params.buildindexKallisto.do_index) {
-        BUILDINDEX_KALLISTO(ch_mash_kallisto_output)
-        ch_kallisto_index = BUILDINDEX_KALLISTO.out
-    } else {
-        ch_kallisto_index = Channel.fromPath(params.buildindexKallisto.index_path)
-    }
-
-    // Llamada a Kallisto Quantificación
-    if (params.workflows.doKallistoQuant) {
-        QUANTIFY_WITH_KALLISTO(ch_kallisto_index, ch_fastq_filtered)
-        ch_kallisto_result = QUANTIFY_WITH_KALLISTO.out
-    } else {
-        ch_kallisto_result = Channel.from([])
-    }
+//    // Llamada a Mash workflow
+//    if (params.workflows.doMash) {
+//        ch_reference_sketch = Channel.fromPath(params.doMash.reference_sketch)
+//        MASH(ch_reference_sketch, ch_rawfastq)
+//        ch_mash_output = MASH.out
+//    } else {
+//        ch_mash_output = Channel.from([])
+//    }
+//
+//    // Llamada a Mash Kallisto Pipeline
+//    if (params.workflows.doMashKallistoPipeline) {
+//        MASH_KALLISTO(ch_mash_output, params.doMashKallistoPipeline.top_strains)
+//        ch_mash_kallisto_output = MASH_KALLISTO.out
+//    } else {
+//        ch_mash_kallisto_output = Channel.from([])
+//    }
+//
+//    // Llamada a Build Index Kallisto
+//    if (params.buildindexKallisto.do_index) {
+//        BUILDINDEX_KALLISTO(ch_mash_kallisto_output)
+//        ch_kallisto_index = BUILDINDEX_KALLISTO.out
+//    } else {
+//        ch_kallisto_index = Channel.fromPath(params.buildindexKallisto.index_path)
+//    }
+//
+//    // Llamada a Kallisto Quantificación
+//    if (params.workflows.doKallistoQuant) {
+//        QUANTIFY_WITH_KALLISTO(ch_kallisto_index, ch_fastq_filtered)
+//        ch_kallisto_result = QUANTIFY_WITH_KALLISTO.out
+//    } else {
+//        ch_kallisto_result = Channel.from([])
+//    }
     
-    if (params.workflows.doClarkS) {
-        CLARK_S(ch_fastq_paired)
-        ch_clark_s_output = CLARK_S.out
-    } else {
-        ch_clark_s_output = Channel.from([])
-    }
+   
 
     // Llamada a MultiQC workflow
     if (params.workflows.doMultiQC) {

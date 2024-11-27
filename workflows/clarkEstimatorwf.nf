@@ -1,39 +1,27 @@
-include { estimateClark } from '../modules/clarkEstimator'
+include { estimateClark } from '../modules/clark_estimator'
 
 workflow CLARK_AND_CLARKS_ESTIMATION {
+     
     take:
-        val estimator_tool
-        path db_dir
-        path clark_results_dir
-        path clarks_results_dir
-
+        clark_results
+        clarks_results
+    
     main:
-       
-        clark_channel = Channel
-            .fromPath("${clark_results_dir}/*.csv")
-            .map { file -> [file.baseName, file] }
 
-        
-        clarks_channel = Channel
-            .fromPath("${clarks_results_dir}/*.csv")
-            .map { file -> [file.baseName, file] }
+        //clark_results = clark_results.map { [it[0], it[1], it[2]]}
+        //clarks_results = clarks_results.map { [it[0], it[1], it[2]] }
 
-        
-        grouped_clark_and_clarks = clark_channel
-            .concat(clarks_channel)
-            .groupTuple(by: 0) 
-            .map { sample_id, files ->
-                def clark_results = files.find { it.getName().contains('Clark') }
-                def clarks_results = files.find { it.getName().contains('Clark_S') }
-                [sample_id, clark_results, clarks_results]
-            }
+        grouped_clark = clark_results
+            .concat(clarks_results)
+            .view{"Grouped Clark: $it"}
 
-        ch_estimation_results = estimateClark(
-            estimator_tool,
-            db_dir,
-            grouped_clark_and_clarks
-        )
+        estimateClark(
+           grouped_clark
+           
+       )
+        ch_estimation_results = estimateClark.out
+        .view{"clark_estimate result: $it"}
 
     emit:
-        ch_estimation_results
+       ch_estimation_results
 }
