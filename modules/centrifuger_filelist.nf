@@ -18,10 +18,10 @@ process CentrifugerMakeFileList{
   script:
   if(ref_name == params.CentrifugerMakeFileList.merges_dbs_name)
   """
-  touch cfgrAll1_file_list.txt cfgrAll1_seqid2taxid2.map
+ touch cfgrAll1_file_list.txt cfgrAll1_seqid2taxid2.map
   for p in library2 library1 library3 library4; do
-      find "$PWD/$p/" -maxdepth 2 -type f -name "*.fna.gz" >> cfgrAll1_file_list.txt
-      cat "$p"_seqid2taxid.map >> cfgrAll1_seqid2taxid2.map
+      find "\$PWD/\$p/" -maxdepth 2 -type f -name "*.fna.gz" >> cfgrAll1_file_list.txt
+      cat "\$p"_seqid2taxid.map >> cfgrAll1_seqid2taxid2.map
   done
   """
   else
