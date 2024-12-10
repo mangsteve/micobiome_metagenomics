@@ -13,7 +13,7 @@
 ## SBATCH --mem 10G                                                                                            ##
 #################################################################################################################
 
-#SBATCH --job-name=test_nf
+#SBATCH --job-name=centrifuge_datos_reales
 #SBATCH -o slurm.%N.%j.out
 #SBATCH -e slurm.%N.%j.err
 #SBATCH --qos=long
@@ -24,4 +24,4 @@
 #Do this before executing sbatch
 module load anaconda #3_2022.10
 
-nextflow run all.nf -c config/run_samples_garnatxa_UPDATED.config -profile conda -resume -with-report report.html -with-dag pipeline_dag.html
+nextflow run all.nf -c config/run_samples_testMetaphlan_garnatxa_local.config -profile conda -resume -with-report report.html -with-dag pipeline_dag.html
