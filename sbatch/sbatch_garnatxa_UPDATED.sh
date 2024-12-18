@@ -17,8 +17,8 @@
 #SBATCH -o slurm.%N.%j.out
 #SBATCH -e slurm.%N.%j.err
 #SBATCH --qos=long
-#SBATCH --cpus-per-task 4
-#SBATCH --mem=16G
+#SBATCH --cpus-per-task 10
+#SBATCH --mem=128G
 #SBATCH --time=8-00:00:00 # 8 días 
 
 #Do this before executing sbatch
